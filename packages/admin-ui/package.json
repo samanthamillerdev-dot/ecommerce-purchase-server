@@ -1,0 +1,26 @@
+{
+  "name": "admin-ui",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Internal console for customer service reps: look up a customer, manage their credit balance, and refund purchases.",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@clickhouse/click-ui": "^0.7.0",
+    "dayjs": "^1.11.19",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "styled-components": "^6.1.11"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
+    "@vitejs/plugin-react": "^4.3.1",
+    "typescript": "^5.5.4",
+    "vite": "^5.4.0"
+  }
+}
