@@ -1,0 +1,24 @@
+{
+  "name": "ecommerce-assessment",
+  "private": true,
+  "version": "1.0.0",
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "npm run build --workspaces --if-present",
+    "dev": "concurrently -n mock-api,server,admin-ui \"npm:dev:mock-api\" \"npm:dev:server\" \"npm:dev:admin-ui\"",
+    "dev:mock-api": "npm run dev --workspace packages/mock-external-api",
+    "dev:server": "npm run dev --workspace packages/server",
+    "dev:admin-ui": "npm run dev --workspace packages/admin-ui",
+    "pretest:e2e": "npm run build --workspace packages/mock-external-api && npm run build --workspace packages/server",
+    "test:e2e": "vitest run --config tests/vitest.config.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "concurrently": "^8.2.2",
+    "supertest": "^7.0.0",
+    "typescript": "^5.5.4",
+    "vitest": "^2.0.5"
+  }
+}
