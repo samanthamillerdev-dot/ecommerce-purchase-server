@@ -1,0 +1,40 @@
+services:
+  mock-external-api:
+    build:
+      context: .
+      dockerfile: packages/mock-external-api/Dockerfile
+    ports:
+      - "4001:4001"
+    environment:
+      PORT: 4001
+
+  server:
+    build:
+      context: .
+      dockerfile: packages/server/Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      PORT: 3000
+      DB_PATH: /data/app.sqlite
+      CUSTOMERS_API_BASE_URL: http://mock-external-api:4001
+      PRODUCTS_API_BASE_URL: http://mock-external-api:4001
+      SHIPMENTS_API_BASE_URL: http://mock-external-api:4001
+    volumes:
+      - server-data:/data
+    depends_on:
+      - mock-external-api
+
+  admin-ui:
+    build:
+      context: .
+      dockerfile: packages/admin-ui/Dockerfile
+      args:
+        VITE_API_BASE_URL: http://localhost:3000
+    ports:
+      - "5173:80"
+    depends_on:
+      - server
+
+volumes:
+  server-data:
