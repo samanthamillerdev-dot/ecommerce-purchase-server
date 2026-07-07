@@ -104,6 +104,25 @@ describe("purchase flow", () => {
       .send({ customerId: OTHER_CUSTOMER_ID, productId: WIDGET_ID, quantity: 1, promoCode: "NOT-A-CODE" });
     expect(res.status).toBe(400);
   });
+
+  it("rejects an expired promo code", async () => {
+    const res = await api()
+      .post("/purchases")
+      .send({ customerId: OTHER_CUSTOMER_ID, productId: WIDGET_ID, quantity: 1, promoCode: "EXPIRED5" });
+    expect(res.status).toBe(400);
+  });
+
+  it("rejects a promo code once its usage limit is reached", async () => {
+    await api()
+      .post("/purchases")
+      .send({ customerId: OTHER_CUSTOMER_ID, productId: WIDGET_ID, quantity: 1, promoCode: "ONETIME10" })
+      .expect(201);
+
+    const res = await api()
+      .post("/purchases")
+      .send({ customerId: OTHER_CUSTOMER_ID, productId: WIDGET_ID, quantity: 1, promoCode: "ONETIME10" });
+    expect(res.status).toBe(400);
+  });
 });
 
 describe("refunds", () => {

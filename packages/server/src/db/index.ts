@@ -20,9 +20,6 @@ export function openDb(path: string = config.dbPath): Db {
   return db;
 }
 
-// node:sqlite has no built-in transaction helper (unlike better-sqlite3), so
-// we roll our own around BEGIN/COMMIT/ROLLBACK for the multi-statement writes
-// in purchase/refund that must succeed or fail together.
 export function runInTransaction<T>(db: Db, fn: () => T): T {
   db.exec("BEGIN");
   try {
@@ -35,9 +32,7 @@ export function runInTransaction<T>(db: Db, fn: () => T): T {
   }
 }
 
-// Seed a couple of demo promo codes. In real life these would be managed
-// through their own CRUD endpoints; out of scope here since the assignment
-// only asks that promo codes be *handled* at purchase time.
+
 function seedPromoCodes(db: Db): void {
   const insert = db.prepare(
     `INSERT OR IGNORE INTO promo_codes (code, discount_percent, discount_amount, max_uses, expires_at, active)
@@ -55,6 +50,20 @@ function seedPromoCodes(db: Db): void {
     discount_percent: null,
     discount_amount: 5,
     max_uses: null,
+    expires_at: null
+  });
+  insert.run({
+    code: "EXPIRED5",
+    discount_percent: null,
+    discount_amount: 5,
+    max_uses: null,
+    expires_at: Date.now() - 24 * 60 * 60 * 1000
+  });
+  insert.run({
+    code: "ONETIME10",
+    discount_percent: 10,
+    discount_amount: null,
+    max_uses: 1,
     expires_at: null
   });
 }
