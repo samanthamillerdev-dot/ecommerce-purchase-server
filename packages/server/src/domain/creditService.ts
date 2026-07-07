@@ -1,6 +1,7 @@
 import { randomUUID } from "crypto";
 import type { Db } from "../db";
 import { InsufficientCreditError, ValidationError } from "./errors";
+import { formatMoney } from "./format";
 import { LedgerEntry, LedgerEntryType } from "./types";
 
 interface LedgerRow {
@@ -41,11 +42,6 @@ export function listLedger(db: Db, customerId: string): LedgerEntry[] {
   return rows.map(toLedgerEntry);
 }
 
-/**
- * Appends a ledger entry and returns it. Must be called from within a
- * transaction when combined with other writes (e.g. a purchase or refund)
- * so the balance change and the record it's tied to are atomic.
- */
 export function appendLedgerEntry(
   db: Db,
   params: {
@@ -84,7 +80,9 @@ export function deductCredit(db: Db, customerId: string, amount: number, reason:
   if (amount <= 0) throw new ValidationError("Deduct amount must be positive");
   const balance = getBalance(db, customerId);
   if (balance < amount) {
-    throw new InsufficientCreditError(`Customer ${customerId} has insufficient credit (balance ${balance}, requested ${amount})`);
+    throw new InsufficientCreditError(
+      `Insufficient credit: balance is ${formatMoney(balance)}, but ${formatMoney(amount)} was requested`
+    );
   }
   return appendLedgerEntry(db, { customerId, type: "DEDUCT", amount: -amount, reason });
 }

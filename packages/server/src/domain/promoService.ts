@@ -11,7 +11,6 @@ interface PromoCodeRow {
   active: number;
 }
 
-/** Validates a promo code against a subtotal and returns the discount to apply. Throws if invalid. */
 export function calculateDiscount(db: Db, code: string, subtotal: number): number {
   const row = db.prepare(`SELECT * FROM promo_codes WHERE code = ?`).get(code) as PromoCodeRow | undefined;
   if (!row || !row.active) {
@@ -28,7 +27,6 @@ export function calculateDiscount(db: Db, code: string, subtotal: number): numbe
   return Math.min(discount, subtotal);
 }
 
-/** Records that a promo code was used. Call within the same transaction as the purchase it discounted. */
 export function recordUsage(db: Db, code: string): void {
   db.prepare(`UPDATE promo_codes SET times_used = times_used + 1 WHERE code = ?`).run(code);
 }

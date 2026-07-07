@@ -8,10 +8,10 @@ export function errorHandler(err: unknown, _req: Request, res: Response, _next: 
     return;
   }
   if (err instanceof ExternalApiError) {
-    res.status(502).json({ message: `Upstream API error: ${err.message}` });
+    console.error("External API call failed:", err.message);
+    res.status(502).json({ message: "The customer/product service is temporarily unavailable. Please try again shortly." });
     return;
   }
-  // eslint-disable-next-line no-console
   console.error(err);
   res.status(500).json({ message: "Internal server error" });
 }

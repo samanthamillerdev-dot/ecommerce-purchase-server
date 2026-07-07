@@ -2,10 +2,11 @@ import { randomUUID } from "crypto";
 import { Db, runInTransaction } from "../db";
 import { getProduct } from "../external/productsClient";
 import { createShipment } from "../external/shipmentsClient";
-import { Address, ExternalApiError } from "../external/types";
+import { Address, ExternalApiError, Product } from "../external/types";
 import { appendLedgerEntry, getBalance } from "./creditService";
 import { fetchCustomerOrThrow } from "./customerLookup";
 import { InsufficientCreditError, NotFoundError, ShipmentFailedError, ValidationError } from "./errors";
+import { formatMoney } from "./format";
 import { calculateDiscount, recordUsage } from "./promoService";
 import { Purchase, PurchaseStatus, PurchaseWithRefunds, Refund } from "./types";
 
@@ -14,7 +15,6 @@ export interface PurchaseParams {
   productId: string;
   quantity: number;
   promoCode?: string;
-  /** Overrides the customer's on-file shipping address for this order, if provided. */
   shippingAddress?: Address;
 }
 
@@ -85,7 +85,7 @@ function withRefunds(db: Db, purchase: Purchase): PurchaseWithRefunds {
   };
 }
 
-async function fetchProductOrThrow(productId: string) {
+async function fetchProductOrThrow(productId: string): Promise<Product> {
   try {
     return await getProduct(productId);
   } catch (err) {
@@ -111,13 +111,10 @@ export async function purchaseProduct(db: Db, params: PurchaseParams): Promise<P
   const balance = getBalance(db, params.customerId);
   if (balance < totalPrice) {
     throw new InsufficientCreditError(
-      `Customer ${params.customerId} has insufficient credit (balance ${balance}, order total ${totalPrice})`
+      `Insufficient credit: balance is ${formatMoney(balance)}, but this order totals ${formatMoney(totalPrice)}`
     );
   }
 
-  // The shipment must succeed before we write anything: a failed shipment
-  // must leave no trace of the purchase and must not touch the customer's
-  // credit balance.
   let shipmentId: string;
   try {
     const shipment = await createShipment({
@@ -126,8 +123,8 @@ export async function purchaseProduct(db: Db, params: PurchaseParams): Promise<P
     });
     shipmentId = shipment.id;
   } catch (err) {
-    const message = err instanceof ExternalApiError ? err.message : "Failed to create shipment";
-    throw new ShipmentFailedError(message);
+    const reason = err instanceof ExternalApiError ? err.message : "the shipping carrier could not be reached";
+    throw new ShipmentFailedError(`Could not ship this order: ${reason}. The purchase was not saved and no credit was deducted.`);
   }
 
   const purchaseRow: PurchaseRow = {
@@ -181,9 +178,7 @@ export function getPurchase(db: Db, purchaseId: string): PurchaseWithRefunds {
 }
 
 export interface RefundParams {
-  /** Refund a specific quantity of the purchased items (amount is derived pro-rata). */
   quantity?: number;
-  /** Refund a specific dollar amount instead (e.g. a goodwill credit not tied to a unit count). */
   amount?: number;
   reason?: string;
 }
@@ -218,7 +213,7 @@ export function refundPurchase(db: Db, purchaseId: string, params: RefundParams)
       throw new ValidationError("amount must be a positive number");
     }
     if (refundAmount > remainingAmount + 0.0001) {
-      throw new ValidationError(`Cannot refund ${refundAmount}; only ${round2(remainingAmount)} remains refundable`);
+      throw new ValidationError(`Cannot refund ${formatMoney(refundAmount)}; only ${formatMoney(round2(remainingAmount))} remains refundable`);
     }
     refundAmount = round2(refundAmount);
   }
