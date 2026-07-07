@@ -1,7 +1,3 @@
-// Talks to the server's public + admin HTTP API. Types here mirror the
-// server's response shapes but are kept independent - this is a separate
-// deployable consuming a JSON API, not sharing source with the server.
-
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:3000";
 
 export interface Address {

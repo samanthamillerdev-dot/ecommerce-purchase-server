@@ -4,7 +4,6 @@ export interface Config {
   customersApiBaseUrl: string;
   productsApiBaseUrl: string;
   shipmentsApiBaseUrl: string;
-  /** How long a cached Customer/Product record is trusted before we re-fetch it. */
   externalApiCacheTtlMs: number;
 }
 

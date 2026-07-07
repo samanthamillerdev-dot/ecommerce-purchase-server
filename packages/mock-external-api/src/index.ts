@@ -5,7 +5,6 @@ import { customers, products } from "./data";
 export const app = express();
 app.use(express.json());
 
-// Artificial network delay so the server's error handling / timeouts get exercised realistically.
 const LATENCY_MS = Number(process.env.MOCK_LATENCY_MS ?? 20);
 app.use((_req, _res, next) => setTimeout(next, LATENCY_MS));
 

@@ -3,11 +3,6 @@ interface CacheEntry<T> {
   expiresAt: number;
 }
 
-// Small in-memory TTL cache used in front of the read-only Customers/Products
-// GET calls. Entries expire after `ttlMs` so a change made on the external
-// team's side (address update, price change, ...) is picked up within that
-// window rather than being cached forever - trading a bounded staleness
-// window for fewer round trips.
 export class TtlCache<T> {
   private readonly store = new Map<string, CacheEntry<T>>();
 

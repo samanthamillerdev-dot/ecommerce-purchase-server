@@ -1,7 +1,3 @@
-// Mirrors the schemas in the Customers/Products/Shipments OpenAPI spec.
-// These are the external team's contracts, not ours - do not add fields here
-// that they don't return.
-
 export interface Address {
   line1?: string;
   line2?: string;

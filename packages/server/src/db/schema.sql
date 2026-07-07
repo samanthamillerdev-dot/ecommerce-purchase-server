@@ -1,6 +1,3 @@
--- Append-only ledger: the source of truth for a customer's balance and the
--- audit trail of every change and why it happened. Balance is never stored as
--- a mutable counter; it is always derived as the latest balance_after.
 CREATE TABLE IF NOT EXISTS credit_ledger (
   id TEXT PRIMARY KEY,
   customer_id TEXT NOT NULL,

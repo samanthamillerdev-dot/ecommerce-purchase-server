@@ -16,7 +16,7 @@ export function CreditAdjustmentForm({ customerId, onAdjusted }: Props): JSX.Ele
   const parsedAmount = Number(amount);
   const canSubmit = amount.trim() !== "" && parsedAmount > 0 && reason.trim() !== "" && !submitting;
 
-  const submit = async (action: "grant" | "deduct") => {
+  const submit = async (action: "grant" | "deduct") => {  
     setSubmitting(true);
     setError(null);
     try {

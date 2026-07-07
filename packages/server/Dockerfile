@@ -17,5 +17,4 @@ COPY --from=build /repo/packages/server/dist packages/server/dist
 WORKDIR /repo/packages/server
 
 EXPOSE 3000
-# node:sqlite is still experimental as of Node 22/24 and needs the flag explicitly enabled.
 CMD ["node", "--experimental-sqlite", "dist/index.js"]

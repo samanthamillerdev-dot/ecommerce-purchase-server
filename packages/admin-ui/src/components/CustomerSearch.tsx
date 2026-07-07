@@ -5,7 +5,6 @@ import { AdminCustomerSummary, listCustomers } from "../api/client";
 interface Props {
   selectedCustomerId: string | null;
   onSelectCustomer: (customerId: string) => void;
-  /** Bump this to force the customer list to refetch (e.g. after a credit or refund change). */
   refreshToken: number;
 }
 

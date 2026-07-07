@@ -20,7 +20,6 @@ async function waitForHealth(url: string, deadline: number): Promise<void> {
       const res = await fetch(url);
       if (res.ok) return;
     } catch {
-      // not up yet
     }
     await new Promise((r) => setTimeout(r, 100));
   }
@@ -35,11 +34,6 @@ export interface RunningStack {
 
 const repoRoot = join(__dirname, "..", "..");
 
-/**
- * Boots the real mock-external-api and server processes (their built dist/
- * output) and waits for both to answer /health. Tests then talk to them over
- * plain HTTP, exactly as a real client would - no test-only wiring.
- */
 export async function startStack(): Promise<RunningStack> {
   const mockApiPort = await getFreePort();
   const serverPort = await getFreePort();
